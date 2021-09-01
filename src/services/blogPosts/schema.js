@@ -9,14 +9,15 @@ const blogSchema = new Schema({
 	    cover:{type: String,required:true},
 	    readTime: {
 	      value: {type:Number},
-	      unit: {type:Number}
+	      unit: {type:Number},
 	    },
 	    author: {
 	      name: {type: String,required:true},
 	      avatar:{type: String,required:true}
-	    },comment:[{
+	    },comments:[{
 			comment:String,
 			rate:Number,
+			commentedDate:Date
 		}],
 	},{
 		timestamps:true

@@ -2,13 +2,17 @@ import express from 'express'
 import blogModel from './schema.js'
 import commentModel from '../comments/schema.js'
 import createError from 'http-errors'
+import q2m from 'query-to-mongo'
 const blogPostsRouter = express.Router()
 
 blogPostsRouter.route('/')
 .get(async(req,res,next)=>{
     try {
-        const blogs = await blogModel.find()
-        res.send(blogs)
+        const query = q2m(req.query)
+        console.log(query)
+        const total = await blogModel.countDocuments(query.criteria)
+        const blogs = await blogModel.find(query.criteria,query.options.fields)
+        res.send({links:query.links('/blogs',total),total,blogs})
     } catch (error) {
         next(error)
     }
@@ -65,14 +69,12 @@ blogPostsRouter.route('/:blogId')
 
 
 
-
-
 blogPostsRouter.route('/:blogId/comments')
 .get(async(req,res,next)=>{
     try {
         const blogs = await blogModel.findById(req.params.blogId)
-        if(user){
-            res.send(blogs.blogs)
+        if(blogs){
+            res.send(blogs.comments)
         }else{
             next(createError(404, `blog with id ${req.params.userId} not found!`))
         }
@@ -106,7 +108,7 @@ blogPostsRouter.route('/:blogId/comments/:commentId')
 .get(async(req,res,next)=>{try {
     const blog = await blogModel.findById(req.params.blogId)
     if(blog){
-        comment = blog.find(b=>b._id.toString()===req.params.commentId)
+        comment = comments.find(b=>b._id.toString()===req.params.commentId)
         if(comment){
             res.send(comment)
         }else{
